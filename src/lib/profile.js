@@ -3,6 +3,7 @@
 
 export function emptyProfile() {
   return {
+    hasResume: false,
     fullName: "",
     email: "",
     phone: "",
@@ -106,6 +107,29 @@ export function completeness(profile) {
     if (filled(profile)) score += weight;
   }
   return Math.min(100, score);
+}
+
+// The recruiter-discoverable threshold. These five requirements mirror the
+// case study's metric definition exactly — change them only if the brief does:
+// headline, at least one key skill, at least one education entry, a city,
+// and a resume attached to the profile.
+const CORE_REQUIREMENTS = [
+  ["headline", "a headline", (p) => !!p.headline],
+  ["keySkills", "your key skills", (p) => p.keySkills.length > 0],
+  ["education", "your education", (p) => p.education.length > 0],
+  ["city", "your city", (p) => !!p.city],
+  ["resume", "a resume", (p) => !!p.hasResume],
+];
+
+export function missingCoreFields(profile) {
+  return CORE_REQUIREMENTS.filter(([, , ok]) => !ok(profile)).map(([key, label]) => ({
+    key,
+    label,
+  }));
+}
+
+export function isDiscoverable(profile) {
+  return missingCoreFields(profile).length === 0;
 }
 
 // Which sections the parser actually filled — used for "from your resume" tags.

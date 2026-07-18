@@ -35,7 +35,7 @@ A working prototype built for a product design case study on Naukri's fresher on
 - File upload with drag-and-drop (PDF / DOCX / DOC / RTF, 2MB limit)
 - Client-side text extraction
 - Gemini parsing of any uploaded resume into structured fields: name, contact, location, headline, summary, work-status inference, skills, employment separated from internships, education, certifications, projects, languages
-- The editable, pre-filled review screen with a live profile-completeness score
+- The editable, pre-filled review screen. Its primary status is a recruiter-visibility threshold: the profile counts as visible once it has a headline, at least one skill, at least one education entry, a city, and a resume attached. The completeness score still exists but as a secondary indicator below that banner, and nothing in the UI prompts completion once the threshold is met.
 
 **Mocked / out of scope:**
 - No database, auth, OTP, or real account creation. "Confirm & create profile" shows a success state and stores nothing.

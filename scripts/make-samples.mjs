@@ -10,6 +10,7 @@ const outDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "sa
 
 const FRESHER = [
   ["h1", "ANANYA SHARMA"],
+  ["sub", "Aspiring Frontend Developer"],
   ["meta", "Pune, Maharashtra | ananya.sharma23@gmail.com | +91 98220 44571"],
   ["meta", "linkedin.com/in/ananya-sharma-dev"],
   ["gap"],
@@ -48,6 +49,7 @@ const FRESHER = [
 
 const EXPERIENCED = [
   ["h1", "ROHIT VERMA"],
+  ["sub", "Senior Product Manager"],
   ["meta", "Bengaluru, Karnataka | rohit.verma88@outlook.com | +91 99010 27364 | linkedin.com/in/rohitverma-pm"],
   ["gap"],
   ["h2", "PROFESSIONAL SUMMARY"],
@@ -125,6 +127,8 @@ async function makePdf(blocks) {
       y -= 10;
     } else if (kind === "h1") {
       draw(text, bold, 20, ink, 0, 2);
+    } else if (kind === "sub") {
+      draw(text, font, 12, blue, 0, 3);
     } else if (kind === "meta") {
       draw(text, font, 10, gray, 0, 2);
     } else if (kind === "h2") {

@@ -3,17 +3,19 @@ import { useEffect, useState } from "react";
 const R = 52;
 const CIRC = 2 * Math.PI * R;
 
-export default function CompletenessRing({ value }) {
-  // Animate from 0 on mount so the "born pre-filled" score visibly climbs.
+export default function CompletenessRing({ value, small }) {
+  // Animate from 0 on mount so the pre-filled score visibly climbs.
   const [shown, setShown] = useState(0);
   useEffect(() => {
     const id = requestAnimationFrame(() => setShown(value));
     return () => cancelAnimationFrame(id);
   }, [value]);
 
+  const px = small ? 88 : 128;
+
   return (
-    <div className="ring" role="img" aria-label={`Profile ${value}% complete`}>
-      <svg viewBox="0 0 120 120" width="128" height="128">
+    <div className={"ring" + (small ? " small" : "")} role="img" aria-label={`Profile ${value}% complete`}>
+      <svg viewBox="0 0 120 120" width={px} height={px}>
         <circle cx="60" cy="60" r={R} fill="none" stroke="var(--line)" strokeWidth="9" />
         <circle
           cx="60"

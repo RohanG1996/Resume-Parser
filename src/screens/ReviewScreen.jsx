@@ -2,7 +2,37 @@ import CompletenessRing from "../components/CompletenessRing.jsx";
 import ChipsInput from "../components/ChipsInput.jsx";
 import Field from "../components/Field.jsx";
 import EntryList from "../components/EntryList.jsx";
-import { completeness } from "../lib/profile.js";
+import { completeness, isDiscoverable, missingCoreFields } from "../lib/profile.js";
+
+// Primary status: the recruiter-visibility threshold. Shows what's true and,
+// when short of it, only the missing core fields. Never a percentage.
+function VisibilityBanner({ profile }) {
+  if (isDiscoverable(profile)) {
+    return (
+      <div className="vis-banner on">
+        <span className="vis-dot" aria-hidden="true" />
+        <div>
+          <strong>You're visible to recruiters</strong>
+          <p>Recruiters can now find you in search.</p>
+        </div>
+      </div>
+    );
+  }
+  const missing = missingCoreFields(profile);
+  return (
+    <div className="vis-banner off">
+      <span className="vis-dot" aria-hidden="true" />
+      <div>
+        <strong>Almost visible to recruiters</strong>
+        <ul>
+          {missing.map((m) => (
+            <li key={m.key}>Add {m.label} to become visible</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
 
 function Section({ title, tag, children, index }) {
   return (
@@ -25,7 +55,10 @@ export default function ReviewScreen({ profile, setProfile, fromResume, fileName
   return (
     <section className="screen review-screen">
       <aside className="review-side">
-        <CompletenessRing value={pct} />
+        <VisibilityBanner profile={profile} />
+        <div className="ring-secondary">
+          <CompletenessRing value={pct} small />
+        </div>
         <p className="side-blurb">
           {parsedAnything ? (
             <>
@@ -181,7 +214,9 @@ export default function ReviewScreen({ profile, setProfile, fromResume, fileName
 
         <Section title="Not in your resume" index={9}>
           <p className="section-hint">
-            Your resume didn't mention these. Add them if you want to.
+            {isDiscoverable(profile)
+              ? "Optional — recruiters can already find you without these."
+              : "Your resume didn't mention these. Add them if you want to."}
           </p>
           <div className="field-grid">
             <Field label="Date of birth" value={profile.dob} onChange={set("dob")} type="date" half />

@@ -20,6 +20,7 @@ export default function App() {
   // then hand the whole thing to the review screen.
   function handleRegister(form) {
     const base = parsedProfile ? { ...parsedProfile } : emptyProfile();
+    base.hasResume = !!parsedProfile;
     base.fullName = form.fullName.trim();
     base.email = form.email.trim();
     base.phone = form.phone.trim();

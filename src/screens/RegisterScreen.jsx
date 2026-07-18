@@ -191,7 +191,9 @@ export default function RegisterScreen({ onParsed, onRegister }) {
                   </svg>
                 </div>
                 <div className="dropzone-text">
-                  <p className="dropzone-main">We've filled the form below from your resume</p>
+                  <p className="dropzone-main">
+                    We've filled the form from your resume. It's ready to go live.
+                  </p>
                   <p className="dropzone-meta">
                     {fileName} ·{" "}
                     <button className="text-btn" onClick={() => inputRef.current?.click()}>

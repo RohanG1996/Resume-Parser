@@ -1,13 +1,21 @@
-import { completeness } from "../lib/profile.js";
+import { completeness, isDiscoverable, missingCoreFields } from "../lib/profile.js";
+
+function listMissing(profile) {
+  const labels = missingCoreFields(profile).map((m) => m.label);
+  if (labels.length === 1) return labels[0];
+  return labels.slice(0, -1).join(", ") + " and " + labels[labels.length - 1];
+}
 
 export default function SuccessScreen({ profile, onStartOver }) {
   const pct = completeness(profile);
+  const visible = isDiscoverable(profile);
   const stats = [
     [profile.keySkills.length, "skills"],
     [profile.employment.length + profile.internships.length, "roles & internships"],
     [profile.education.length, "education entries"],
     [profile.projects.length, "projects"],
-  ].filter(([n]) => n > 0);
+    [pct + "%", "complete"],
+  ].filter(([n]) => n !== 0 && n !== "0%");
 
   return (
     <section className="screen success-screen">
@@ -25,11 +33,26 @@ export default function SuccessScreen({ profile, onStartOver }) {
           </svg>
         </div>
         <h1>
-          Profile created. You're at <em>{pct}%</em> already.
+          {visible ? (
+            <>
+              Your profile is live and <em>visible to recruiters</em>.
+            </>
+          ) : (
+            <>Your profile is live.</>
+          )}
         </h1>
         <p className="sub">
-          {profile.fullName ? `${profile.fullName}, your` : "Your"} profile is ready. Add the
-          remaining details whenever you like, then start applying.
+          {visible ? (
+            <>
+              {profile.fullName ? `${profile.fullName}, recruiters` : "Recruiters"} can now find
+              you in search. Start applying whenever you're ready.
+            </>
+          ) : (
+            <>
+              {profile.fullName ? `${profile.fullName}, add` : "Add"} {listMissing(profile)} to
+              become visible to recruiters. Everything you entered is on your profile.
+            </>
+          )}
         </p>
         {stats.length > 0 && (
           <ul className="success-stats">
