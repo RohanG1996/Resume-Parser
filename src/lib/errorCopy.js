@@ -15,33 +15,38 @@ const CANT_READ =
 const RATE_LIMIT =
   "We're getting a lot of requests right now. Wait a moment and try again.";
 
-// Returns { message, refresh } — `refresh` marks errors a page reload can fix
-// (a stale deployment serving a chunk URL that no longer exists).
+// Returns { message, refresh, retry }:
+//   refresh — a page reload can fix it (stale deploy serving a dead chunk URL)
+//   retry   — retrying the SAME input can succeed (transient failures only);
+//             false for deterministic failures where the input must change,
+//             so the UI can drop a "Try again" that would just fail again.
 export function describeError(err) {
   const name = err?.name;
   const kind = err?.kind;
 
-  // Failure loading the extraction module — usually a stale deploy.
-  if (kind === "moduleLoad") return { message: OUR_SIDE, refresh: true };
+  // Failure loading the extraction module — usually a stale deploy. Transient.
+  if (kind === "moduleLoad") return { message: OUR_SIDE, refresh: true, retry: true };
 
+  // Extraction failures are deterministic: the same file fails the same way,
+  // so no "Try again" — the user has to change the input.
   if (name === "ExtractionError") {
-    if (kind === "empty") return { message: CANT_READ };
+    if (kind === "empty") return { message: CANT_READ, retry: false };
     // oversized / unsupported / unreadable already carry plain, safe,
     // actionable copy we wrote, so pass those through unchanged.
-    return { message: err.message };
+    return { message: err.message, retry: false };
   }
 
   if (name === "ParseError") {
-    if (kind === "network") return { message: OUR_SIDE };
-    if (kind === "rateLimit") return { message: RATE_LIMIT };
-    return { message: CANT_BUILD };
+    if (kind === "network") return { message: OUR_SIDE, retry: true };
+    if (kind === "rateLimit") return { message: RATE_LIMIT, retry: true };
+    return { message: CANT_BUILD, retry: true };
   }
 
-  // Untagged dynamic-import / network failures that slipped through.
-  if (isChunkLoadError(err)) return { message: OUR_SIDE, refresh: true };
+  // Untagged dynamic-import / network failures that slipped through. Transient.
+  if (isChunkLoadError(err)) return { message: OUR_SIDE, refresh: true, retry: true };
 
-  // Anything else: never leak the raw text.
-  return { message: CANT_BUILD };
+  // Anything else: never leak the raw text; assume it might be transient.
+  return { message: CANT_BUILD, retry: true };
 }
 
 function isChunkLoadError(err) {

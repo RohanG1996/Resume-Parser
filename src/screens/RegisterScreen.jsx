@@ -18,7 +18,7 @@ export default function RegisterScreen({ onParsed, onRegister }) {
   const lastFile = useRef(null);
 
   const [phase, setPhase] = useState("idle"); // idle | parsing | done | error
-  const [error, setError] = useState({ message: "", refresh: false });
+  const [error, setError] = useState({ message: "", refresh: false, retry: false });
   const [fileName, setFileName] = useState("");
   const [msgIndex, setMsgIndex] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -42,7 +42,7 @@ export default function RegisterScreen({ onParsed, onRegister }) {
   async function handleFile(file) {
     lastFile.current = file;
     setFileName(file.name);
-    setError({ message: "", refresh: false });
+    setError({ message: "", refresh: false, retry: false });
     setMsgIndex(0);
     setPhase("parsing");
     try {
@@ -233,22 +233,35 @@ export default function RegisterScreen({ onParsed, onRegister }) {
                 <div className="dropzone-text">
                   <p className="dropzone-main">{error.message}</p>
                   <p className="dropzone-meta">
-                    {error.refresh && (
-                      <>
+                    {/* Actions are per-cause: only offer what can actually help.
+                        Refresh/Try again appear only when they could succeed;
+                        change-the-input options are always available. */}
+                    {[
+                      error.refresh && (
                         <button className="text-btn" onClick={() => window.location.reload()}>
                           Refresh the page
-                        </button>{" "}
-                        ·{" "}
-                      </>
-                    )}
-                    <button className="text-btn" onClick={() => lastFile.current && handleFile(lastFile.current)}>
-                      Try again
-                    </button>{" "}
-                    ·{" "}
-                    <button className="text-btn" onClick={() => inputRef.current?.click()}>
-                      upload a different file
-                    </button>{" "}
-                    · or just fill the form below
+                        </button>
+                      ),
+                      error.retry && (
+                        <button
+                          className="text-btn"
+                          onClick={() => lastFile.current && handleFile(lastFile.current)}
+                        >
+                          Try again
+                        </button>
+                      ),
+                      <button className="text-btn" onClick={() => inputRef.current?.click()}>
+                        upload a different file
+                      </button>,
+                      <span>or just fill the form below</span>,
+                    ]
+                      .filter(Boolean)
+                      .map((node, i) => (
+                        <span key={i}>
+                          {i > 0 && " · "}
+                          {node}
+                        </span>
+                      ))}
                   </p>
                 </div>
               </div>
