@@ -148,10 +148,16 @@ export default function RegisterScreen({ onParsed, onRegister }) {
                 </div>
                 <div className="dropzone-text">
                   <p className="dropzone-main">
-                    Drop your resume here, or <span className="linkish">browse</span>
+                    {/* Drag-and-drop language only applies with a pointer; on
+                        touch (<768px) the whole card is the tap target. */}
+                    <span className="dz-pointer">
+                      Drop your resume here, or <span className="linkish">browse</span>
+                    </span>
+                    <span className="dz-touch">Upload your resume</span>
                   </p>
                   <p className="dropzone-meta">
-                    PDF, DOC or DOCX up to 2MB. We'll fill the form below in seconds.
+                    PDF, DOC or DOCX up to 2MB. We'll fill the form
+                    <span className="dz-pointer"> below</span> in seconds.
                   </p>
                 </div>
               </div>

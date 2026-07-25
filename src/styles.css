@@ -361,6 +361,11 @@ body {
   overflow-wrap: anywhere;
 }
 
+/* Dropzone copy swaps between pointer and touch variants (see below-768 rule). */
+.dz-touch {
+  display: none;
+}
+
 .linkish {
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -1069,17 +1074,43 @@ body {
     padding: 26px 22px 32px;
   }
 
+  /* Sidebar becomes a compact header card. Explicit areas so adding or
+     reordering children can't scramble the layout the way auto-placement did. */
   .review-side {
     position: static;
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: 4px 20px;
+    grid-template-areas:
+      "banner banner"
+      "ring   blurb"
+      "action action"
+      "note   note";
+    gap: 12px 16px;
     text-align: left;
     align-items: center;
   }
 
-  .review-side .ring {
-    grid-row: span 3;
+  .vis-banner {
+    grid-area: banner;
+    margin-bottom: 0;
+  }
+
+  .ring-secondary {
+    grid-area: ring;
+  }
+
+  .side-blurb {
+    grid-area: blurb;
+    margin: 0;
+  }
+
+  .review-side .btn.primary {
+    grid-area: action;
+  }
+
+  .side-note {
+    grid-area: note;
+    margin: 0;
   }
 
   .field.half {
@@ -1092,5 +1123,53 @@ body {
 
   .topbar-right {
     display: none;
+  }
+
+  /* iOS Safari zooms the page when a focused input is under 16px. */
+  .reg-field input:not([type="checkbox"]),
+  .field input,
+  .field textarea,
+  .field.mini input,
+  .field.mini textarea,
+  .chip-input {
+    font-size: 16px;
+  }
+
+  .card {
+    padding: 18px 16px;
+  }
+
+  /* Stack the dropzone so the copy gets the full width instead of being
+     squeezed into a narrow column beside the icon. */
+  .dropzone {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    padding: 24px 20px;
+  }
+
+  .dropzone-main {
+    font-size: 17px;
+  }
+
+  .success-card {
+    padding: 36px 24px;
+  }
+
+  .success-stats {
+    gap: 18px;
+  }
+}
+
+/* Below 768px we treat the device as touch: the drag-and-drop wording is
+   replaced with plain "Upload your resume", and the whole card is the tap
+   target (the dropzone div already carries the click/keyboard handlers). */
+@media (max-width: 767px) {
+  .dz-pointer {
+    display: none;
+  }
+
+  .dz-touch {
+    display: inline;
   }
 }

@@ -19,7 +19,16 @@ A working prototype built for a product design case study on Naukri's fresher on
    GEMINI_API_KEY=your_key_here
    ```
 3. `npm run dev`. The Vite dev server also serves the `/api` routes locally, so the full flow works without the Vercel CLI.
-4. Test with the resumes in [`/samples`](samples). The PDFs can be regenerated with `npm run samples`.
+4. Test with the resumes in [`/samples`](samples) (the generated ones can be rebuilt with `npm run samples`). Each is chosen to exercise a different part of the parser:
+
+   | Sample | Format | What it tests |
+   |---|---|---|
+   | Ananya Sharma (fresher) | PDF / DOC | Baseline fresher; internships-only, work status inferred |
+   | Rohit Verma (PM) | PDF | Baseline experienced; multiple full-time roles |
+   | Priya Nair (nurse) | PDF | Non-tech domain — parsing generalises beyond software roles |
+   | Marcus D'Souza (data analyst) | DOCX | The native `.docx` extraction path; internship separated from full-time |
+   | Sameer Khan (fresher) | PDF | No headline and no city — lands on the "Almost visible" state |
+   | Fatima Sheikh (marketing) | PDF | Location on the same line as the name, plus a career gap and an internship mixed with full-time roles |
 
 ## Deploy to Vercel
 
