@@ -135,6 +135,7 @@ export default async function handler(req, res) {
   if (geminiRes.status === 429) {
     return res.status(502).json({
       error: "We've hit the free tier's rate limit. Wait a minute and try again.",
+      code: "rate_limit",
     });
   }
   if (!geminiRes.ok) {

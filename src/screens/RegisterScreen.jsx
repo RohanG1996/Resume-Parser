@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { parseResume } from "../lib/parseResume.js";
 import { profileFromParse } from "../lib/profile.js";
+import { describeError } from "../lib/errorCopy.js";
 
 const ACCEPT = ".pdf,.docx,.doc,.rtf";
 
@@ -17,7 +18,7 @@ export default function RegisterScreen({ onParsed, onRegister }) {
   const lastFile = useRef(null);
 
   const [phase, setPhase] = useState("idle"); // idle | parsing | done | error
-  const [error, setError] = useState(null);
+  const [error, setError] = useState({ message: "", refresh: false });
   const [fileName, setFileName] = useState("");
   const [msgIndex, setMsgIndex] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -41,11 +42,21 @@ export default function RegisterScreen({ onParsed, onRegister }) {
   async function handleFile(file) {
     lastFile.current = file;
     setFileName(file.name);
-    setError(null);
+    setError({ message: "", refresh: false });
     setMsgIndex(0);
     setPhase("parsing");
     try {
-      const { extractText } = await import("../lib/extractText.js");
+      let extractText;
+      try {
+        ({ extractText } = await import("../lib/extractText.js"));
+      } catch {
+        // Tag the dynamic-import failure so it maps to the "our side" copy
+        // (and a refresh hint) rather than leaking the raw chunk URL.
+        const e = new Error("module load failed");
+        e.name = "AppError";
+        e.kind = "moduleLoad";
+        throw e;
+      }
       const text = await extractText(file);
       const parsed = await parseResume(text);
       const built = profileFromParse(parsed);
@@ -67,7 +78,7 @@ export default function RegisterScreen({ onParsed, onRegister }) {
         formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
       );
     } catch (err) {
-      setError(err.message || "Something went wrong. Please try again.");
+      setError(describeError(err));
       setPhase("error");
     }
   }
@@ -220,8 +231,16 @@ export default function RegisterScreen({ onParsed, onRegister }) {
                   </svg>
                 </div>
                 <div className="dropzone-text">
-                  <p className="dropzone-main">{error}</p>
+                  <p className="dropzone-main">{error.message}</p>
                   <p className="dropzone-meta">
+                    {error.refresh && (
+                      <>
+                        <button className="text-btn" onClick={() => window.location.reload()}>
+                          Refresh the page
+                        </button>{" "}
+                        ·{" "}
+                      </>
+                    )}
                     <button className="text-btn" onClick={() => lastFile.current && handleFile(lastFile.current)}>
                       Try again
                     </button>{" "}

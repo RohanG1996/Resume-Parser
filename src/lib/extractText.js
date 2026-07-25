@@ -9,7 +9,14 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 export const MAX_FILE_BYTES = 2 * 1024 * 1024; // mirror Naukri's ~2MB limit
 
-export class ExtractionError extends Error {}
+export class ExtractionError extends Error {
+  // kind: "empty" | "oversized" | "unsupported" | "unreadable"
+  constructor(message, kind = "unreadable") {
+    super(message);
+    this.name = "ExtractionError";
+    this.kind = kind;
+  }
+}
 
 const SCANNED_MSG =
   "We couldn't find any text in this file. If it's a scanned image, try a text-based PDF or DOCX instead.";
@@ -69,7 +76,8 @@ async function extractDoc(file) {
   }
   if (!res.ok) {
     throw new ExtractionError(
-      data?.error || "We couldn't read this .doc file. Try saving it as PDF or DOCX."
+      data?.error || "We couldn't read this .doc file. Try saving it as PDF or DOCX.",
+      "unreadable"
     );
   }
   return data?.text || "";
@@ -92,7 +100,7 @@ function extractRtf(rtf) {
 
 export async function extractText(file) {
   if (file.size > MAX_FILE_BYTES) {
-    throw new ExtractionError("This file is over 2MB. Please upload a smaller resume.");
+    throw new ExtractionError("This file is over 2MB. Please upload a smaller resume.", "oversized");
   }
 
   const name = file.name.toLowerCase();
@@ -108,12 +116,13 @@ export async function extractText(file) {
     } else if (name.endsWith(".doc")) {
       text = await extractDoc(file);
     } else {
-      throw new ExtractionError("Please upload a PDF, DOCX or RTF resume.");
+      throw new ExtractionError("Please upload a PDF, DOCX or RTF resume.", "unsupported");
     }
   } catch (err) {
     if (err instanceof ExtractionError) throw err;
     throw new ExtractionError(
-      "We couldn't open this file. Try saving it again as PDF or DOCX."
+      "We couldn't open this file. Try saving it again as PDF or DOCX.",
+      "unreadable"
     );
   }
 
@@ -123,7 +132,7 @@ export async function extractText(file) {
     .replace(/\n{3,}/g, "\n\n")
     .trim();
   if (normalized.replace(/\s/g, "").length < 40) {
-    throw new ExtractionError(SCANNED_MSG);
+    throw new ExtractionError(SCANNED_MSG, "empty");
   }
   return normalized;
 }
