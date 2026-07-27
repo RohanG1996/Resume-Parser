@@ -6,14 +6,16 @@ import { completeness, isDiscoverable, missingCoreFields } from "../lib/profile.
 
 // Primary status: the recruiter-visibility threshold. Shows what's true and,
 // when short of it, only the missing core fields. Never a percentage.
+// Pre-confirmation the threshold being met is a *readiness* state, not a live
+// one — the present-tense "you're visible" belongs on the success screen.
 function VisibilityBanner({ profile }) {
   if (isDiscoverable(profile)) {
     return (
       <div className="vis-banner on">
         <span className="vis-dot" aria-hidden="true" />
         <div>
-          <strong>You're visible to recruiters</strong>
-          <p>Recruiters can now find you in search.</p>
+          <strong>Ready to go live — you'll be visible to recruiters</strong>
+          <p>Everything recruiters need is here. Confirm to go live.</p>
         </div>
       </div>
     );
